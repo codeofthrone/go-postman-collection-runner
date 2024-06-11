@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -22,36 +23,30 @@ type HttpClient interface {
 type Postman struct {
 	collectionFile string
 	collection     *postman.Collection
-	variables      map[string]string
+	Variables      map[string]string
 	httpClient     HttpClient
 }
 
 // NewPostman is a function that creates a new instance of Bid.
 // It takes a collection file, a map of variables, and an HttpClient as arguments.
-func NewPostman(collectionFile string, variables map[string]string, httpClient HttpClient) *Postman {
-	return &Postman{
-		collectionFile: collectionFile,
-		variables:      variables,
-		httpClient:     httpClient,
-	}
-}
-
-// ParsePostmanCollection is a method that parses a Postman collection.
-// It returns a parsed Postman collection and an error.
-func (b *Postman) ParsePostmanCollection() error {
-	file, err := os.Open(b.collectionFile)
+func NewPostman(collectionFile string, variables map[string]string, httpClient HttpClient) (*Postman, error) {
+	file, err := os.Open(collectionFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
 	collection, err := postman.ParseCollection(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	b.collection = collection
-	return nil
+	return &Postman{
+		collectionFile: collectionFile,
+		collection:     collection,
+		Variables:      variables,
+		httpClient:     httpClient,
+	}, nil
 }
 
 // FindRequestByName is a method that finds a request by name in a list of Postman items.
@@ -72,7 +67,7 @@ func (b *Postman) FindRequestByName(items []*postman.Items, name string) (*postm
 // ReplaceVariables is a method that replaces Postman variables in the given text with their actual values.
 // It returns the text with the variables replaced.
 func (b *Postman) ReplaceVariables(text string) string {
-	for key, value := range b.variables {
+	for key, value := range b.Variables {
 		variablePlaceholder := fmt.Sprintf("{{%s}}", key)
 		text = strings.ReplaceAll(text, variablePlaceholder, value)
 	}
@@ -133,5 +128,74 @@ func (b *Postman) FindAndSendRequest(name string) (map[string]interface{}, error
 	if err != nil {
 		return nil, err
 	}
-	return b.SendRequest(req)
+	result, err := b.SendRequest(req)
+	// parser b.collection.events
+	// if event is test, execute the script
+	events := item.Events
+	b.ReplaceVariablesInScript(events, result)
+	return result, err
+}
+
+// GetDataFromResponse retrieves data from a response based on the given query.
+// It takes a response map and a query as input and returns the corresponding data.
+// The query is a list of keys that represent the path to the desired data in the response map.
+// If the data is found, it is returned. Otherwise, nil is returned.
+func (b *Postman) GetDataFromResponse(response map[string]interface{}, query []string) interface{} {
+	insertRes := response
+	for i, s := range query {
+		if i == len(query)-1 {
+			return insertRes[s]
+		}
+		if s != "responseData" {
+			insertRes = response[s].(map[string]interface{})
+			return b.GetDataFromResponse(insertRes, query[i+1:])
+		}
+	}
+	return nil
+}
+
+// ReplaceVariablesInScript replaces variables in the script based on the provided events and result.
+// It iterates through the events and checks if the event type is "test".
+// If the event type is "test", it extracts the script and searches for specific patterns to replace variables.
+// The function uses regular expressions to match patterns and extract relevant information.
+// If a match is found, it retrieves the data from the response and replaces the variable in the script.
+// If no match is found, it assigns the original value to the variable.
+// The replaced variables are stored in the `Variables` map of the `Postman` struct.
+func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[string]interface{}) {
+	for _, event := range events {
+		if event.Listen == "test" {
+			script := event.Script.Exec
+			var source string
+			responeseFlag := false
+			for _, value := range script {
+				if strings.Contains(value, "pm.response.json()") {
+					responeseFlag = true
+					parts := strings.Split(value, "=")
+					if len(parts) < 2 {
+						continue
+					}
+					source = strings.TrimSpace(parts[0])
+					source = strings.ReplaceAll(source, "var", "")
+					source = strings.ReplaceAll(source, "let", "")
+					source = strings.TrimSpace(source)
+				}
+				if strings.Contains(value, "pm.environment.set") && responeseFlag {
+					pattern := `pm\.environment\.set\(\"(.*)\",\s*(.*)\)\;`
+					re := regexp.MustCompile(pattern)
+					match := re.FindStringSubmatch(value)
+					if len(match) < 3 {
+						continue
+					}
+					queryJson := match[2]
+					if strings.Contains(queryJson, source) {
+						query := strings.Split(queryJson, ".")
+						replaceVariable := b.GetDataFromResponse(result, query)
+						b.Variables[match[1]] = replaceVariable.(string)
+					} else {
+						b.Variables[match[1]] = match[2]
+					}
+				}
+			}
+		}
+	}
 }
