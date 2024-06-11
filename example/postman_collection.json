@@ -1,0 +1,111 @@
+{
+	"info": {
+		"name": "Requests for flow: Business"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "create_user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); // 獲取 JSON 格式的回應數據",
+									"pm.environment.set(\"user_id\", responseData.data.id); // 將特定數據保存到環境變量",
+									"pm.environment.set(\"userName\", responseData.data.name); // 將特定數據保存到環境變量",
+									"pm.environment.set(\"isOA\",\"no\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"stage_info\":\"{{stage_info}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/user_create",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"user_create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user_upgrade_oa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var responseData = pm.response.json(); ",
+									"pm.environment.set(\"isOA\",responseData.received);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\":\"{{user_id}}\",\n    \"stage_info\":\"{{stage_info}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/user_upgrade_oa",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"user_upgrade_oa"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
