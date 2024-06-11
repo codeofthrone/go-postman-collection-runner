@@ -7,6 +7,8 @@ This package provides a quick way to write a Postman collection runner in Go. It
 - Parse Postman collections
 - Find requests by name in a Postman collection
 - Replace Postman variables in text with their actual values within test script setup
+- Send HTTP requests
+- Retrieve data from a response based on a given query
 
 ## Usage
 
@@ -17,12 +19,7 @@ First, create a new Postman instance:
 ```go
 variables := map[string]string{"var1": "value1", "var2": "value2"}
 httpClient := &http.Client{}
-postman := NewPostman("path/to/collection.json", variables, httpClient)
-```
-
-## Parser postman collection
-```go
-err := postman.ParsePostmanCollection()
+postman, err := NewPostman("path/to/collection.json", variables, httpClient)
 if err != nil {
     log.Fatal(err)
 }
@@ -30,12 +27,11 @@ if err != nil {
 
 ## Find request by name
 ```go
-item, err := postman.FindRequestByName(postman.collection.Items, "requestName")
+item, err := postman.FindRequestByName("requestName")
 if err != nil {
     log.Fatal(err)
 }
 ```
-
 
 
 Dependencies
