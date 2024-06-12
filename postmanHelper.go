@@ -29,7 +29,7 @@ type Postman struct {
 
 // NewPostman is a function that creates a new instance of Bid.
 // It takes a collection file, a map of variables, and an HttpClient as arguments.
-func NewPostman(collectionFile string, variables map[string]string, httpClient HttpClient) (*Postman, error) {
+func NewPostman(collectionFile string, variables map[string]interface{}, httpClient HttpClient) (*Postman, error) {
 	file, err := os.Open(collectionFile)
 	if err != nil {
 		return nil, err
