@@ -212,7 +212,7 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 						case []interface{}:
 							var strSlice []string
 							for _, val := range v {
-								strSlice = append(strSlice, fmt.Sprintf("\"%v\"", val))
+								strSlice = append(strSlice, fmt.Sprintf("%v", val))
 							}
 							b.Variables[match[1]] = strSlice
 						default:
