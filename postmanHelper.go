@@ -197,7 +197,12 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 					if strings.Contains(queryJson, source) {
 						query := strings.Split(queryJson, ".")
 						replaceVariable := b.GetDataFromResponse(result, query)
-						b.Variables[match[1]] = replaceVariable.(string)
+						switch v := replaceVariable.(type) {
+						case string:
+							b.Variables[match[1]] = v
+						case []string:
+							b.Variables[match[1]] = strings.Join(v, ",")
+						}
 					} else {
 						b.Variables[match[1]] = match[2]
 					}
