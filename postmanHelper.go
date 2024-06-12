@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -69,7 +70,12 @@ func (b *Postman) FindRequestByName(items []*postman.Items, name string) (*postm
 func (b *Postman) ReplaceVariables(text string) string {
 	for key, value := range b.Variables {
 		variablePlaceholder := fmt.Sprintf("{{%s}}", key)
-		text = strings.ReplaceAll(text, variablePlaceholder, value.(string))
+		switch v := value.(type) {
+		case int:
+			text = strings.ReplaceAll(text, variablePlaceholder, strconv.Itoa(v))
+		case string:
+			text = strings.ReplaceAll(text, variablePlaceholder, v)
+		}
 	}
 	return text
 }
