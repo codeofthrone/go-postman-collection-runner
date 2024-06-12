@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/rbretecher/go-postman-collection"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/rbretecher/go-postman-collection"
 )
 
 // HttpClient is an interface that represents an HTTP client.
@@ -192,7 +193,7 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 					if len(match) < 3 {
 						continue
 					}
-					queryJson := match[2]
+					queryJson := strings.TrimSpace(match[2])
 					if strings.Contains(queryJson, source) {
 						query := strings.Split(queryJson, ".")
 						replaceVariable := b.GetDataFromResponse(result, query)
