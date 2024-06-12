@@ -22,7 +22,7 @@ type HttpClient interface {
 }
 
 // PM is a struct that represents a bid.
-// It has three fields: collectionFile, variables, and httpClient.
+// It has three fields: collectionFile, collection, Variables, and httpClient.
 type Postman struct {
 	collectionFile string
 	collection     *postman.Collection
@@ -70,13 +70,19 @@ func (b *Postman) FindRequestByName(items []*postman.Items, name string) (*postm
 // ReplaceVariables is a method that replaces Postman variables in the given text with their actual values.
 // It returns the text with the variables replaced.
 func (b *Postman) ReplaceVariables(text string) string {
+	re := regexp.MustCompile(`{{(.*?)}}`)
+	matches := re.FindAllStringSubmatch(text, -1)
 	for key, value := range b.Variables {
-		variablePlaceholder := fmt.Sprintf("{{%s}}", key)
-		switch v := value.(type) {
-		case int:
-			text = strings.ReplaceAll(text, variablePlaceholder, strconv.Itoa(v))
-		case string:
-			text = strings.ReplaceAll(text, variablePlaceholder, v)
+		for _, match := range matches {
+			if key == match[1] {
+				variablePlaceholder := fmt.Sprintf("{{%s}}", key)
+				switch v := value.(type) {
+				case int:
+					text = strings.ReplaceAll(text, variablePlaceholder, strconv.Itoa(v))
+				case string:
+					text = strings.ReplaceAll(text, variablePlaceholder, v)
+				}
+			}
 		}
 	}
 	return text
