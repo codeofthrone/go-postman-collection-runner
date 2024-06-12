@@ -23,7 +23,7 @@ type HttpClient interface {
 type Postman struct {
 	collectionFile string
 	collection     *postman.Collection
-	Variables      map[string]string
+	Variables      map[string]interface{}
 	httpClient     HttpClient
 }
 
@@ -69,7 +69,7 @@ func (b *Postman) FindRequestByName(items []*postman.Items, name string) (*postm
 func (b *Postman) ReplaceVariables(text string) string {
 	for key, value := range b.Variables {
 		variablePlaceholder := fmt.Sprintf("{{%s}}", key)
-		text = strings.ReplaceAll(text, variablePlaceholder, value)
+		text = strings.ReplaceAll(text, variablePlaceholder, value.(string))
 	}
 	return text
 }
