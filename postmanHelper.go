@@ -86,7 +86,7 @@ func (b *Postman) ReplaceVariables(text string) string {
 					for _, val := range v {
 						strSlice = append(strSlice, fmt.Sprintf("%v", val))
 					}
-					text = strings.ReplaceAll(text, variablePlaceholder, strings.Join(strSlice, ", "))
+					text = strings.ReplaceAll(text, variablePlaceholder, strings.Join(strSlice, ","))
 				}
 			}
 		}
