@@ -81,6 +81,12 @@ func (b *Postman) ReplaceVariables(text string) string {
 					text = strings.ReplaceAll(text, variablePlaceholder, strconv.Itoa(v))
 				case string:
 					text = strings.ReplaceAll(text, variablePlaceholder, v)
+				case []string:
+					var strSlice []string
+					for _, val := range v {
+						strSlice = append(strSlice, fmt.Sprintf("%v", val))
+					}
+					text = strings.ReplaceAll(text, variablePlaceholder, strings.Join(strSlice, ", "))
 				}
 			}
 		}
