@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -200,8 +201,14 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 						switch v := replaceVariable.(type) {
 						case string:
 							b.Variables[match[1]] = v
-						case []string:
-							b.Variables[match[1]] = strings.Join(v, ",")
+						case []interface{}:
+							var strSlice []string
+							for _, val := range v {
+								strSlice = append(strSlice, fmt.Sprintf("%v", val))
+							}
+							b.Variables[match[1]] = strings.Join(strSlice, ",")
+						default:
+							log.Println("Unknown type", v)
 						}
 					} else {
 						b.Variables[match[1]] = match[2]
