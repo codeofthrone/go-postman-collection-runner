@@ -163,8 +163,10 @@ func (b *Postman) GetDataFromResponse(response map[string]interface{}, query []s
 			return insertRes[s]
 		}
 		if s != "responseData" {
-			insertRes = response[s].(map[string]interface{})
-			return b.GetDataFromResponse(insertRes, query[i+1:])
+			if response[s] != nil {
+				insertRes = response[s].(map[string]interface{})
+				return b.GetDataFromResponse(insertRes, query[i+1:])
+			}
 		}
 	}
 	return nil
