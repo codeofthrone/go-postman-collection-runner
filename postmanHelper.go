@@ -131,7 +131,6 @@ func (b *Postman) CreateRequest(item *postman.Items) (*http.Request, error) {
 		headerValue := b.ReplaceVariables(fmt.Sprintf("%v", header.Value))
 		req.Header.Set(header.Key, headerValue)
 	}
-
 	return req, nil
 }
 
