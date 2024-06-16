@@ -129,6 +129,9 @@ func (b *Postman) CreateRequest(item *postman.Items) (*http.Request, error) {
 
 	for _, header := range request.Header {
 		headerValue := b.ReplaceVariables(fmt.Sprintf("%v", header.Value))
+		if header.Key == "Authorization" {
+			headerValue = "Bearer " + b.ReplaceVariables(headerValue)
+		}
 		req.Header.Set(header.Key, headerValue)
 	}
 	return req, nil
