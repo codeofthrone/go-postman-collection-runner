@@ -106,6 +106,9 @@ func (b *Postman) CreateRequest(item *postman.Items) (*http.Request, error) {
 	}
 	for _, header := range request.Header {
 		headerValue := b.ReplaceVariables(fmt.Sprintf("%v", header.Value))
+		if header.Key == "Authorization" {
+			headerValue = "Bearer " + b.ReplaceVariables(headerValue)
+		}
 		req.Header.Set(header.Key, headerValue)
 	}
 	return req, nil
@@ -148,7 +151,9 @@ func (b *Postman) FindAndSendRequest(name string) (map[string]interface{}, error
 	// parser b.collection.events
 	// if event is test, execute the script
 	events := item.Events
-	b.ReplaceVariablesInScript(events, result)
+	if result != nil {
+		b.ReplaceVariablesInScript(events, result)
+	}
 	return result, err
 }
 
