@@ -104,16 +104,17 @@ func (b *Postman) CreateRequest(item *postman.Items) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	switch request.Auth.Type {
-	case "bearer":
-		authValue := b.ReplaceVariables(fmt.Sprintf("%v", request.Auth.Bearer[0].Value))
-		req.Header.Set("Authorization", "Bearer "+authValue)
-	case "basic":
-		authValue := b.ReplaceVariables(fmt.Sprintf("%v", request.Auth.Basic[0].Value))
-		req.Header.Set("Authorization", "Basic "+authValue)
-	default:
-		log.Println("Unknown auth type", request.Auth.Type)
+	if request.Auth != nil {
+		switch request.Auth.Type {
+		case "bearer":
+			authValue := b.ReplaceVariables(fmt.Sprintf("%v", request.Auth.Bearer[0].Value))
+			req.Header.Set("Authorization", "Bearer "+authValue)
+		case "basic":
+			authValue := b.ReplaceVariables(fmt.Sprintf("%v", request.Auth.Basic[0].Value))
+			req.Header.Set("Authorization", "Basic "+authValue)
+		default:
+			log.Println("Unknown auth type", request.Auth.Type)
+		}
 	}
 
 	for _, header := range request.Header {
