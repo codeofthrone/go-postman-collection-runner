@@ -224,17 +224,19 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 					if strings.Contains(queryJson, source) {
 						query := strings.Split(queryJson, ".")
 						replaceVariable := b.GetDataFromResponse(result, query)
-						switch v := replaceVariable.(type) {
-						case string:
-							b.Variables[match[1]] = v
-						case []interface{}:
-							var strSlice []string
-							for _, val := range v {
-								strSlice = append(strSlice, val.(string))
+						if replaceVariable != nil {
+							switch v := replaceVariable.(type) {
+							case string:
+								b.Variables[match[1]] = v
+							case []interface{}:
+								var strSlice []string
+								for _, val := range v {
+									strSlice = append(strSlice, val.(string))
+								}
+								b.Variables[match[1]] = "\"" + strings.Join(strSlice, ",") + "\""
+							case nil:
+								b.Variables[match[1]] = nil
 							}
-							b.Variables[match[1]] = "\"" + strings.Join(strSlice, ",") + "\""
-						default:
-							log.Println("Unknown type", v)
 						}
 					} else {
 						b.Variables[match[1]] = match[2]
