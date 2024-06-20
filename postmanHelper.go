@@ -189,12 +189,14 @@ func (b *Postman) GetDataFromResponse(response map[string]interface{}, query []s
 }
 
 // ReplaceVariablesInScript replaces variables in the script based on the provided events and result.
-// It iterates through the events and checks if the event type is "test".
-// If the event type is "test", it extracts the script and searches for specific patterns to replace variables.
-// The function uses regular expressions to match patterns and extract relevant information.
-// If a match is found, it retrieves the data from the response and replaces the variable in the script.
-// If no match is found, it assigns the original value to the variable.
+// Based on the events provided which was saved in script, the function checks if the event is a test event.
+// This Function current only supports pm.response.json() and pm.environment.set() functions.
+// It then retrieves the data from the response based on the extracted information and replaces the variables accordingly.
 // The replaced variables are stored in the `Variables` map of the `Postman` struct.
+//
+// Parameters:
+// - events: A slice of `Event` pointers representing the events to process.
+// - result: A map[string]interface{} representing the result data.
 func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[string]interface{}) {
 	for _, event := range events {
 		if event.Listen == "test" {
