@@ -84,6 +84,9 @@ func (b *Postman) ReplaceVariables(text string) string {
 				case []string:
 					// Replace the variable with a comma-separated string representation of the []string.
 					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf("[%q]", strings.Join(v, ",")))
+				default:
+					// Handle all other types of variables.
+					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf("%v", v))
 				}
 			}
 		}
@@ -242,6 +245,8 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 								b.Variables[match[1]] = strSlice
 							case nil:
 								b.Variables[match[1]] = nil
+							default:
+								b.Variables[match[1]] = v
 							}
 						}
 					} else {
