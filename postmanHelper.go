@@ -84,6 +84,8 @@ func (b *Postman) ReplaceVariables(text string) string {
 				case []string:
 					// Replace the variable with a comma-separated string representation of the []string.
 					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf("[%q]", strings.Join(v, ",")))
+				case nil:
+					text = strings.ReplaceAll(text, variablePlaceholder, "null")
 				default:
 					// Handle all other types of variables.
 					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf("%v", v))
@@ -105,6 +107,7 @@ func (b *Postman) CreateRequest(item *postman.Items) (*http.Request, error) {
 		// Remove the extra double quotes around the image IDs in the request body.
 		rawBody = strings.ReplaceAll(rawBody, `"[`, `[`)
 		rawBody = strings.ReplaceAll(rawBody, `]"`, `]`)
+		rawBody = strings.ReplaceAll(rawBody, `<nil>`, "null")
 		body = []byte(rawBody)
 	}
 	req, err := http.NewRequest(string(request.Method), url, bytes.NewBuffer(body))
