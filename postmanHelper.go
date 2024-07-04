@@ -245,7 +245,7 @@ func (b *Postman) ReplaceVariablesInScript(events []*postman.Event, result map[s
 								for _, val := range v {
 									strSlice = append(strSlice, val.(string))
 								}
-								b.Variables[match[1]] = strSlice
+								b.Variables[match[1]] = "\"" + strings.Join(strSlice, ",") + "\""
 							case nil:
 								b.Variables[match[1]] = nil
 							default:
