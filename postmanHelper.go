@@ -82,7 +82,8 @@ func (b *Postman) ReplaceVariables(text string) string {
 				case string:
 					text = strings.ReplaceAll(text, variablePlaceholder, v)
 				case []string:
-					text = strings.ReplaceAll(text, variablePlaceholder, strings.Join(v, ","))
+					// Replace the variable with a comma-separated string representation of the []string.
+					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf("%q", v))
 				}
 			}
 		}
