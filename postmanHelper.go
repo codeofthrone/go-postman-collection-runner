@@ -99,6 +99,9 @@ func (b *Postman) CreateRequest(item *postman.Items) (*http.Request, error) {
 	var body []byte
 	if request.Body != nil && request.Body.Raw != "" {
 		rawBody := b.ReplaceVariables(request.Body.Raw)
+		// Remove the extra double quotes around the image IDs in the request body.
+		rawBody = strings.ReplaceAll(rawBody, `\"[`, `[`)
+		rawBody = strings.ReplaceAll(rawBody, `]\"`, `]`)
 		body = []byte(rawBody)
 	}
 	req, err := http.NewRequest(string(request.Method), url, bytes.NewBuffer(body))
