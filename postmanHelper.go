@@ -83,7 +83,7 @@ func (b *Postman) ReplaceVariables(text string) string {
 					text = strings.ReplaceAll(text, variablePlaceholder, v)
 				case []string:
 					// Replace the variable with a comma-separated string representation of the []string.
-					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf("[%q]", strings.Join(v, ",")))
+					text = strings.ReplaceAll(text, variablePlaceholder, fmt.Sprintf(`["%s"]`, strings.Join(v, ",")))
 				case nil:
 					text = strings.ReplaceAll(text, variablePlaceholder, "null")
 				default:
